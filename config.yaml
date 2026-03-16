@@ -7,31 +7,33 @@ paths:
 
   specs_dir: data/processed/specs
 
-  split_json: data/splits/split_by_day_v1.json
+  threshold_sweep_dir: "data/raw/threshold_sweep"
 
   runs_dir: runs
 
 audio:
   sample_rate: 16000    
   normalization: rms
+  #normalization: none
   target_rms: 0.1
 
 windowing:
   #window_sec: 1.0
   window_sec: 2.0
   stride_sec: 1.0    # 50% overlap
-  #stride_sec: 1.0       # no overlap
+  #stride_sec: 2.0       # no overlap
 
 spectrogram:
-  #n_mels: 64
-  n_mels: 96
-  #n_fft: 1024
-  n_fft: 4096
+  n_mels: 64
+  #n_mels: 96
+  n_fft: 1024
+  #n_fft: 4096
   hop_length: 512
   power: 2.0
   fmin: 0
   fmax: 8000
   log_eps: 1e-6
+  #normalization: per_sample
   normalization: none
 
 split:
@@ -43,16 +45,18 @@ training:
   seed: 42
   batch_size: 32
   epochs: 200
-  learning_rate: 0.001
+  #learning_rate: 0.001
+  learning_rate: 0.0004195
   val_ratio: 0.1
-  patience: 25
+  patience: 15
   min_delta: 1e-3
+  weight_decay: 1e-6
   
 threshold:
   percentiles: [95, 99]
 
 model:
-  latent_dim: 64
+  latent_dim: 256
 
 isoforest:
   n_estimators: 300 # numero de arboles
@@ -61,4 +65,4 @@ isoforest:
   random_state: 42 # fija la semilla aleatoria.
   use_scaler: false # resta la media de esa feature y divide por su desviacion estandar
   use_pca: true
-  pca_components: 150
+  pca_components: 100

@@ -107,6 +107,6 @@ class AudioRecorder:
         try:
             m = alsaaudio.Mixer(control="Mic", cardindex=2)
             m.setvolume(self.mic_volume)
-            print(f"🎚  Mic volume: {m.getvolume()}")
+            print(f"Mic volume: {m.getvolume()}")
         except Exception as exc:
             print(f"⚠  Could not set mic volume: {exc}")

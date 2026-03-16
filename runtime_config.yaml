@@ -9,7 +9,7 @@
 
 # ── Model & inference ────────────────────────────────────────
 inference:
-  model_path: "/home/tesis/Desktop/project/models/model_best.pth"
+  model_path: "/home/tesis/Desktop/PFC-raspi/models/model_best.pth"
   threshold:  0.126478
   model_type: "conv"          # reserved for future architectures
 
@@ -51,7 +51,7 @@ lcd:
 aws_iot:
   enabled: false
   device_id: "raspi-lab01"
-  model_run: "model_best_v1"
+  model_run: "unknown"
   endpoint: "a1ctxrgzb003b-ats.iot.us-east-1.amazonaws.com"
   topic: "raspi5/sensors/data"
   port: 8883
