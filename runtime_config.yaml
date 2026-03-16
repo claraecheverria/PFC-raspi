@@ -1,0 +1,49 @@
+# ============================================================
+# runtime_config.yaml  –  Operational / deployment settings
+#
+# This file contains ONLY the settings needed to run the
+# inference pipeline on the Raspberry Pi.
+# DSP parameters (sample_rate, n_mels, n_fft, etc.) live in
+# config.yaml so training and inference stay in sync.
+# ============================================================
+
+# ── Model & inference ────────────────────────────────────────
+inference:
+  model_path: "/home/tesis/Desktop/project/models/model_best.pth"
+  threshold:  0.126478
+  model_type: "conv"          # reserved for future architectures
+
+# ── Live recording ───────────────────────────────────────────
+recording:
+  card_index:        "USB PnP Sound Device: Audio (hw:2,0)"
+  mic_volume:        30         # 0–100  (alsaaudio)
+  samplerate:        44100      # capture sample rate
+  target_samplerate: 16000      # resampled to this (must match audio.sample_rate)
+  channels:          1
+  duration:          2          # seconds per segment
+  sleep_seconds:     1          # pause between segments
+  threshold_gb:      5          # stop recording if free disk < this (GB)
+  label:             "test"     # filename prefix  ("normal" | "anomaly" | "test")
+
+# ── Audio quality gate ───────────────────────────────────────
+preprocess:
+  frame_length: 1024
+  hop_length:   256
+  # "off machine" detection
+  band_low:            250
+  band_high:           430
+  band_off_threshold:  -5.0
+  off_smooth_window:   7
+  off_trigger_seconds: 2.0
+  # "loud noise" detection
+  abs_loud_threshold_dbfs: -12.0
+  robust_z_threshold:      6.0
+  loud_smooth_window:      7
+  loud_trigger_seconds:    1.0
+
+# ── LCD display ──────────────────────────────────────────────
+lcd:
+  enabled:  true
+  i2c_addr: 0x27
+  i2c_bus:  1
+  width:    16
