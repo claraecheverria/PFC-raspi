@@ -47,3 +47,19 @@ lcd:
   i2c_addr: 0x27
   i2c_bus:  1
   width:    16
+
+aws_iot:
+  enabled: false
+  device_id: "raspi-lab01"
+  model_run: "model_best_v1"
+  endpoint: "a1ctxrgzb003b-ats.iot.us-east-1.amazonaws.com"
+  topic: "raspi5/sensors/data"
+  port: 8883
+  root_ca: "/home/tesis/aws_certs/AmazonRootCA1.pem"
+  cert: "/home/tesis/aws_certs/certificate.pem.crt"
+  private_key: "/home/tesis/aws_certs/private.pem.key"
+  qos: 1
+  offline_queue_size: -1
+  draining_frequency: 2
+  connect_disconnect_timeout: 10
+  operation_timeout: 5
