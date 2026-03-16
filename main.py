@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""main.py â€“ Unified entry point for the anomaly-detection pipeline.
+"""main.py – Unified entry point for the anomaly-detection pipeline.
 
 Two config files are loaded and merged automatically:
-  config.yaml         â€“ DSP / model / training params  (original, unchanged)
-  runtime_config.yaml â€“ inference path, recording, LCD â€¦
+  config.yaml         – DSP / model / training params  (original, unchanged)
+  runtime_config.yaml – inference path, recording, LCD …
 
 Usage examples
 --------------
-# Live mode â€“ record -> filter -> infer (don't save audio to disk)
+# Live mode – record -> filter -> infer (don't save audio to disk)
 python main.py --mode live
 
 # Live mode + save valid audio
 python main.py --mode live --save-dir /home/tesis/Audios
 
-# Batch mode â€“ process a folder of WAVs
+# Batch mode – process a folder of WAVs
 python main.py --mode batch --audio-dir /home/tesis/Audios/2026-03-06
 
 # Override threshold or model path without editing any file
@@ -40,7 +40,7 @@ from inference.detector import AnomalyDetector
 from display.lcd        import LCDDisplay
 
 
-# â”€â”€ CLI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── CLI ───────────────────────────────────────────────────────────────────────
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
@@ -50,11 +50,11 @@ def parse_args() -> argparse.Namespace:
         "--mode",
         choices=["live", "batch"],
         required=True,
-        help="'live'  â€“ continuous recording loop.  "
-             "'batch' â€“ process all WAVs in --audio-dir.",
+        help="'live'  – continuous recording loop.  "
+             "'batch' – process all WAVs in --audio-dir.",
     )
 
-    # â”€â”€ config files â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── config files ─────────────────────────────────────────
     p.add_argument(
         "--config",
         default=None,
@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
              "(default: runtime_config.yaml next to main.py).",
     )
 
-    # â”€â”€ inference overrides â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── inference overrides ──────────────────────────────────
     p.add_argument(
         "--model-path",
         default=None,
@@ -84,7 +84,7 @@ def parse_args() -> argparse.Namespace:
         help="Override inference.threshold from runtime_config.",
     )
 
-    # â”€â”€ live-mode options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── live-mode options ────────────────────────────────────
     p.add_argument(
         "--save-dir",
         default=None,
@@ -93,7 +93,7 @@ def parse_args() -> argparse.Namespace:
              "Omit to run inference without saving to disk.",
     )
 
-    # â”€â”€ batch-mode options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # ── batch-mode options ───────────────────────────────────
     p.add_argument(
         "--audio-dir",
         default=None,
@@ -104,7 +104,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-# â”€â”€ pipeline helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── pipeline helpers ──────────────────────────────────────────────────────────
 
 def _print_result(filename: str, error: float, label: str) -> None:
     icon = "X" if label == "ANOMALY" else "OK"
@@ -118,7 +118,7 @@ def _run_inference(mel, detector: AnomalyDetector, lcd: LCDDisplay, filename: st
     return error, label
 
 
-# â”€â”€ live mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── live mode ─────────────────────────────────────────────────────────────────
 
 def run_live(cfg: dict, detector: AnomalyDetector, lcd: LCDDisplay, save_dir):
     """Continuous recording loop.
@@ -187,7 +187,7 @@ def run_live(cfg: dict, detector: AnomalyDetector, lcd: LCDDisplay, save_dir):
         time.sleep(recorder.sleep_seconds)
 
 
-# â”€â”€ batch mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── batch mode ────────────────────────────────────────────────────────────────
 
 def run_batch(cfg: dict, detector: AnomalyDetector, lcd: LCDDisplay, audio_dir: str):
     """Process every WAV file in audio_dir.
@@ -235,7 +235,7 @@ def run_batch(cfg: dict, detector: AnomalyDetector, lcd: LCDDisplay, audio_dir: 
     print(f"  Discarded   : {results['discarded']}")
 
 
-# â”€â”€ entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── entry point ───────────────────────────────────────────────────────────────
 
 def main():
     args = parse_args()
