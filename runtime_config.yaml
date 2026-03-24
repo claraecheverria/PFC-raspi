@@ -63,3 +63,7 @@ aws_iot:
   draining_frequency: 2
   connect_disconnect_timeout: 10
   operation_timeout: 5
+  backup_enabled: true
+  backup_path: "/home/tesis/Desktop/PFC-raspi/var/aws_iot_pending.jsonl"
+  backup_max_messages: 1000
+  backup_flush_batch_size: 50
