@@ -16,12 +16,6 @@ import librosa
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
-def _robust_z(x: np.ndarray, eps: float = 1e-9) -> np.ndarray:
-    med = np.median(x)
-    mad = np.median(np.abs(x - med)) + eps
-    return (x - med) / (1.4826 * mad)
-
-
 def _smooth_majority(mask: np.ndarray, window: int, frac: float = 0.6) -> np.ndarray:
     if window <= 1:
         return mask
@@ -98,7 +92,7 @@ def should_discard(
         ref=1.0,
     )
     loud_mask = _smooth_majority(
-        (rms_db > p["abs_loud_threshold_dbfs"]) | (_robust_z(rms_db) > p["robust_z_threshold"]),
+        rms_db > p["abs_loud_threshold_dbfs"],
         int(p["loud_smooth_window"]),
     )
     for t0, t1 in _contiguous_segments(loud_mask, times):

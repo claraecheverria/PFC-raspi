@@ -37,7 +37,6 @@ preprocess:
   off_trigger_seconds: 1.2
   # "loud noise" detection
   abs_loud_threshold_dbfs: -12.0
-  robust_z_threshold:      6.0
   loud_smooth_window:      7
   loud_trigger_seconds:    1.0
 
