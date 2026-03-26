@@ -64,6 +64,17 @@ def _normalize_audio(y: np.ndarray, mode: str, target_rms: float = 0.1) -> np.nd
         return _rms_normalize(y, target_rms=target_rms)
     raise ValueError(f"Unknown audio normalization mode: '{mode}'")
 
+def normalize_spec(x: np.ndarray, mode: str) -> np.ndarray:
+    """
+    mode: 'none', 'per_sample'
+    """
+    if mode == "none":
+        return x
+    if mode == "per_sample":
+        mu = float(np.mean(x))
+        sigma = float(np.std(x)) + 1e-8
+        return (x - mu) / sigma
+    raise ValueError(f"Unknown normalization mode: {mode}")
 
 # ── public API ────────────────────────────────────────────────────────────────
 
@@ -79,7 +90,7 @@ def wav_to_mel(path: str, cfg: dict) -> np.ndarray:
     """
     sr         = cfg["audio"]["sample_rate"]
     window_sec = cfg["windowing"]["window_sec"]
-    norm_mode  = cfg["audio"].get("normalization", "none")
+    audio_norm_mode  = cfg["audio"].get("normalization", "none")
     target_rms = float(cfg["audio"].get("target_rms"))
 
     sp         = cfg["spectrogram"]
@@ -90,9 +101,10 @@ def wav_to_mel(path: str, cfg: dict) -> np.ndarray:
     fmax       = sp.get("fmax")
     log_eps    = float(sp.get("log_eps", 1e-6))
     center     = bool(sp.get("center"))
+    norm_mode = sp.get("normalization", "none")  # 'none' or 'per_sample'
 
     y, _ = librosa.load(path, sr=sr)
-    y    = _normalize_audio(y, mode=norm_mode, target_rms=target_rms)
+    y    = _normalize_audio(y, mode=audio_norm_mode, target_rms=target_rms)
 
     S = librosa.feature.melspectrogram(
         y=y,
@@ -106,6 +118,9 @@ def wav_to_mel(path: str, cfg: dict) -> np.ndarray:
         center=center,
     )
     logS = np.log(S + log_eps).astype(np.float32)
+
+    # Normalize (optional)
+    logS = normalize_spec(logS, norm_mode).astype(np.float32)
 
     # Enforce the exact time dimension used during training
     t_target = _expected_frames(window_sec, sr, n_fft, hop_length, center=center)

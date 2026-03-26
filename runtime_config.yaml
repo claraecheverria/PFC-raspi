@@ -10,7 +10,7 @@
 # ── Model & inference ────────────────────────────────────────
 inference:
   model_path: "/home/tesis/Desktop/PFC-raspi/models/model_best.pth"
-  threshold:  0.126478
+  threshold:  0.1219
   model_type: "conv"          # reserved for future architectures
 
 # ── Live recording ───────────────────────────────────────────
@@ -30,11 +30,11 @@ preprocess:
   frame_length: 1024
   hop_length:   256
   # "off machine" detection
-  band_low:            250
-  band_high:           430
-  band_off_threshold:  -5.0
+  band_low:            5000
+  band_high:           7000
+  band_off_threshold:  -10.0
   off_smooth_window:   7
-  off_trigger_seconds: 2.0
+  off_trigger_seconds: 1.2
   # "loud noise" detection
   abs_loud_threshold_dbfs: -12.0
   robust_z_threshold:      6.0

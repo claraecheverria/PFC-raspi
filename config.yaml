@@ -33,8 +33,8 @@ spectrogram:
   fmin: 0
   fmax: 8000
   log_eps: 1e-6
-  #normalization: per_sample
-  normalization: none
+  normalization: per_sample
+  #normalization: none
 
 split:
   train_ratio: 0.70
@@ -45,10 +45,10 @@ training:
   seed: 42
   batch_size: 32
   epochs: 200
-  #learning_rate: 0.001
-  learning_rate: 0.0004195
+  learning_rate: 0.001
+  #learning_rate: 0.0004195
   val_ratio: 0.1
-  patience: 15
+  patience: 25
   min_delta: 1e-3
   weight_decay: 1e-6
   
@@ -56,7 +56,7 @@ threshold:
   percentiles: [95, 99]
 
 model:
-  latent_dim: 256
+  latent_dim: 32
 
 isoforest:
   n_estimators: 300 # numero de arboles
