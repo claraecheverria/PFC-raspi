@@ -171,9 +171,12 @@ def run_live(
     print(f"  model      = {detector.model_path}")
     print(f"  save audio = {save_dir or 'no'}")
     print(f"  send aws   = {'yes' if publisher.enabled else 'no'}")
+    if publisher.enabled and publisher.backup_enabled:
+        print(f"  aws backup = {publisher.backup_path}")
     print("  Press Ctrl+C to stop.\n")
 
     lcd.clear()
+    publisher.flush_pending()
 
     while True:
         # 1. disk-space guard (only when saving)
@@ -252,6 +255,7 @@ def run_batch(
     print(f"  threshold = {detector.threshold}")
     print(f"  model     = {detector.model_path}")
     print(f"  send aws  = {'yes' if publisher.enabled else 'no'}\n")
+    publisher.flush_pending()
 
     results = {"NORMAL": 0, "ANOMALY": 0, "discarded": 0}
 

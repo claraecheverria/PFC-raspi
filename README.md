@@ -88,6 +88,7 @@ Notes:
 - On Raspberry Pi, the LCD also depends on I2C being enabled in the OS.
 - If `smbus2` is unavailable, the LCD becomes a no-op.
 - AWS IoT publishing is skipped unless it is explicitly enabled.
+- If AWS IoT is enabled but the Pi loses internet, payloads are queued on disk and retried automatically.
 - If `pyalsaaudio` is unavailable, ALSA mic-volume control is skipped.
 
 ## Configuration
@@ -109,6 +110,8 @@ Important sections:
 - `preprocess`: quality-gate thresholds for `off machine` and `loud noise`
 - `lcd`: LCD bus/address settings
 - `aws_iot`: endpoint, topic, certificates, and publish behavior
+
+For resilient live deployments, `aws_iot.backup_enabled` stores failed publishes in `aws_iot.backup_path` as JSON Lines so the Pi can keep recording and inferencing while offline.
 
 ## Usage
 
