@@ -3,17 +3,26 @@
 #
 # This file contains ONLY the settings needed to run the
 # inference pipeline on the Raspberry Pi.
-# DSP parameters (sample_rate, n_mels, n_fft, etc.) live in
-# config.yaml so training and inference stay in sync.
+# DSP parameters for the spectrogram model stay in config.yaml.
 # ============================================================
 
 # ── Model & inference ────────────────────────────────────────
 inference:
-  model_path: "/home/tesis/Desktop/PFC-raspi/models/model_best.pth"
-  threshold:  0.1219
-  model_type: "conv"          # reserved for future architectures
+  # model_path: "/home/tesis/Desktop/PFC-raspi/models/model_best.pth"
+  model_path: "models/ae.h5"
+  threshold: 0.0018157327 #0.1219
+  model_type: "mfcc"          # "conv" (PyTorch log-mel) | "mfcc" (Keras MFCC)
+  mean_path: "models/mean.npy"  # used when model_type: mfcc
+  std_path: "models/std.npy"    # used when model_type: mfcc
 
-# ── Live recording ───────────────────────────────────────────
+mfcc:
+  n_mfcc: 20
+  frame_ms: 64
+  hop_ms: 32
+  n_mels: 64
+  target_frames: 64
+  target_rms: 0.1
+
 recording:
   card_index:        "USB PnP Sound Device: Audio (hw:2,0)"
   mic_volume:        30         # 0–100  (alsaaudio)

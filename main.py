@@ -38,7 +38,6 @@ if ROOT not in sys.path:
 from config_loader import load_config
 from audio.recorder import AudioRecorder
 from audio.preprocess import should_discard
-from audio.features import wav_to_mel
 from inference.detector import AnomalyDetector
 from display.lcd import LCDDisplay
 from raspi_publish import AWSIoTPublisher
@@ -73,6 +72,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         metavar="PATH",
         help="Override inference.model_path from runtime_config.",
+    )
+    parser.add_argument(
+        "--model-type",
+        default=None,
+        choices=["conv", "mfcc"],
+        help="Override inference.model_type from runtime_config.",
     )
     parser.add_argument(
         "--threshold",
@@ -135,13 +140,14 @@ def _publish_result(
 
 
 def _run_inference(
-    mel,
+    wav_path: str,
+    cfg: dict,
     detector: AnomalyDetector,
     lcd: LCDDisplay,
     filename: str,
     publisher: AWSIoTPublisher,
 ):
-    error, label = detector.predict_from_mel(mel)
+    error, label = detector.predict_from_file(wav_path, cfg)
     _print_result(filename, error, label)
     lcd.show_error(error, label)
     _publish_result(publisher, error, label)
@@ -168,6 +174,7 @@ def run_live(
 
     print("\n=== Live mode started ===")
     print(f"  threshold  = {detector.threshold}")
+    print(f"  model type = {detector.model_type}")
     print(f"  model      = {detector.model_path}")
     print(f"  save audio = {save_dir or 'no'}")
     print(f"  send aws   = {'yes' if publisher.enabled else 'no'}")
@@ -211,21 +218,21 @@ def run_live(
             continue
 
         lcd.show("valid")
+        # 5. run inference
 
-        # 5. feature extraction -> inference
-        mel = wav_to_mel(wav_path, cfg)
-
-        if tmp_path:
-            os.unlink(tmp_path)
-            tmp_path = None
-
-        _run_inference(
-            mel,
-            detector,
-            lcd,
-            os.path.basename(wav_path),
-            publisher,
-        )
+        try:
+            _run_inference(
+                wav_path,
+                cfg,
+                detector,
+                lcd,
+                os.path.basename(wav_path),
+                publisher,
+            )
+        finally:
+            if tmp_path:
+                os.unlink(tmp_path)
+                tmp_path = None
 
         time.sleep(recorder.sleep_seconds)
 
@@ -253,6 +260,7 @@ def run_batch(
 
     print(f"\n=== Batch mode  |  {len(wav_files)} files  |  dir={audio_dir} ===")
     print(f"  threshold = {detector.threshold}")
+    print(f"  model type = {detector.model_type}")
     print(f"  model     = {detector.model_path}")
     print(f"  send aws  = {'yes' if publisher.enabled else 'no'}\n")
     publisher.flush_pending()
@@ -270,9 +278,9 @@ def run_batch(
             continue
 
         try:
-            mel = wav_to_mel(path, cfg)
             _, label = _run_inference(
-                mel,
+                path,
+                cfg,
                 detector,
                 lcd,
                 filename,
@@ -299,6 +307,8 @@ def main():
     overrides: dict = {}
     if args.model_path:
         overrides.setdefault("inference", {})["model_path"] = args.model_path
+    if args.model_type:
+        overrides.setdefault("inference", {})["model_type"] = args.model_type
     if args.threshold is not None:
         overrides.setdefault("inference", {})["threshold"] = args.threshold
     overrides.setdefault("aws_iot", {})["enabled"] = args.send_to_aws
@@ -315,6 +325,9 @@ def main():
     detector = AnomalyDetector(
         model_path=inf_cfg["model_path"],
         threshold=float(inf_cfg["threshold"]),
+        model_type=inf_cfg.get("model_type", "conv"),
+        mean_path=inf_cfg.get("mean_path"),
+        std_path=inf_cfg.get("std_path"),
     )
     lcd = LCDDisplay(cfg)
     publisher = AWSIoTPublisher(cfg.get("aws_iot"))
